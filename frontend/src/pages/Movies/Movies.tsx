@@ -1,9 +1,9 @@
-const Movie = () => {
+const Movies = () => {
   return (
     <div className="text-white text-4xl">
-      Movie Page
+      movies Page
     </div>
   );
 };
 
-export default Movie;
+export default Movies;
