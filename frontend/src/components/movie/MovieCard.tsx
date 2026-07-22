@@ -6,13 +6,21 @@ interface MovieCardProps {
 }
 
 const MovieCard = ({ movie, onClick }: MovieCardProps) => {
+  console.log("Rendering card", movie.title);
+  console.log({
+  title: movie.title,
+  poster: movie.poster,
+});
+  // console.log(movie.poster);
   return (
     <button
       type="button"
       aria-label={`Open ${movie.title}`}
       onClick={() => onClick?.(movie)}
-      snap-start
+      
       className="
+      snap-start
+        shrink-0
         group
         w-[220px]
         overflow-hidden
@@ -38,6 +46,8 @@ const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           <img
             src={movie.poster}
             alt={movie.title}
+  //            onLoad={() => console.log("Loaded", movie.title)}
+  // onError={() => console.log("Failed", movie.title)}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (

@@ -8,6 +8,7 @@ import Settings from '@/pages/Settings/Settings';
 import MainLayout from '@/layouts/MainLayout';
 import NotFound from '@/pages/NotFound/NotFound';
 import Shows from '@/pages/Shows/Shows';
+import MovieDetails from '@/pages/MovieDetails/MovieDetails';
 
 const AppRouter=()=>{
     return(
@@ -15,6 +16,7 @@ const AppRouter=()=>{
                 <Route element={<MainLayout/>}>
                 <Route index element={<Home/>} />
                 <Route path='/movies' element={<Movies />} />
+                <Route path='/movie/:id' element={<MovieDetails />} />
                 <Route path='/player/:id' element={<Player/>} />
                 <Route path='/search' element={<Search/>} />
                 <Route path='/shows' element={<Shows/>} />

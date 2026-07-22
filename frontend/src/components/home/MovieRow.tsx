@@ -12,6 +12,7 @@ const MovieRow = ({
   movies,
   onMovieClick,
 }: MovieRowProps) => {
+  console.log("MovieRow", title, movies.length);
   return (
     <section className="space-y-5">
       <h2 className="text-2xl font-bold text-white">
