@@ -36,7 +36,12 @@ const MovieCard = ({ movie, onClick }: MovieCardProps) => {
         
       "
     >
-      <div className="aspect-[2/3] bg-zinc-800">
+      <div className="relative aspect-[2/3] bg-zinc-800">
+        {movie.isHevc && (
+          <span className="absolute right-3 top-3 z-10 rounded-md bg-black/80 px-2 py-1 text-xs font-bold text-amber-400 backdrop-blur-sm">
+            HEVC
+          </span>
+        )}
         {movie.poster ? (
           <img
             src={movie.poster}

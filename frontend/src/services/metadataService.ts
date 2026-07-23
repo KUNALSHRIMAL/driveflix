@@ -1,4 +1,4 @@
-import { searchMovie } from "@/api/tmdb";
+import { getMovieDetails, searchMovie } from "@/api/tmdb";
 import { parseMovieName } from "@/utils/parseMovieName";
 
 import {
@@ -17,7 +17,9 @@ export async function getMovieMetadata(fileName: string) {
   const cached = cache[key];
 
   const isValidCache =
-    cached && Date.now() - cached.cachedAt < 7 * 24 * 60 * 60 * 1000;
+    cached &&
+    cached.version === 2 &&
+    Date.now() - cached.cachedAt < 7 * 24 * 60 * 60 * 1000;
 
   if (isValidCache) {
     return cached;
@@ -26,6 +28,7 @@ export async function getMovieMetadata(fileName: string) {
   const movie = await searchMovie(parsed.title, parsed.year);
   if (!movie) {
     cache[key] = {
+      version: 2,
       title: parsed.title,
       year: parsed.year,
       cachedAt: Date.now(),
@@ -34,20 +37,29 @@ export async function getMovieMetadata(fileName: string) {
     return null;
   }
 
+  const details = await getMovieDetails(movie.id).catch(() => null);
+  const releaseDate = details?.release_date || movie.release_date;
+  const releaseYear = releaseDate
+    ? Number(releaseDate.slice(0, 4))
+    : parsed.year;
+
   cache[key] = {
-    title: movie.title,
-    year: parsed.year,
+    version: 2,
+    tmdbId: movie.id,
+    title: details?.title ?? movie.title,
+    year: releaseYear,
 
-    poster: movie.poster_path,
-    backdrop: movie.backdrop_path,
+    poster: details?.poster_path ?? movie.poster_path ?? undefined,
+    backdrop: details?.backdrop_path ?? movie.backdrop_path ?? undefined,
 
-    overview: movie.overview,
+    overview: details?.overview ?? movie.overview,
 
-    rating: movie.vote_average,
+    rating: details?.vote_average ?? movie.vote_average,
 
-    releaseDate: movie.release_date,
+    releaseDate,
+    runtime: details?.runtime ?? undefined,
 
-    genres: movie.genre_ids,
+    genres: details?.genres.map((genre) => genre.name) ?? [],
 
     cachedAt: Date.now(),
   };

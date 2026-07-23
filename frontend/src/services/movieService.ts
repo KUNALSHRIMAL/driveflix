@@ -26,13 +26,29 @@ function buildImageUrl(
   return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+function formatRuntime(runtime: number | undefined) {
+  if (!runtime || runtime <= 0) return "--:--";
+
+  const hours = Math.floor(runtime / 60);
+  const minutes = runtime % 60;
+
+  if (!hours) return `${minutes}m`;
+  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+function isHevcFile(fileName: string) {
+  return /(?:^|[^a-z0-9])(?:hevc|x265|h[.\s_-]?265)(?:[^a-z0-9]|$)/i.test(
+    fileName
+  );
+}
+
 async function loadMovies(
   accessToken: string,
   limit: number
 ): Promise<Movie[]> {
   const driveVideos = (await getDriveVideos(accessToken, limit)) as DriveVideo[];
 
-  return promisePool(driveVideos, 10, async (driveVideo) => {
+  const movies = await promisePool(driveVideos, 10, async (driveVideo) => {
     const parsed = parseMovieName(driveVideo.name);
     const metadata = await getMovieMetadata(driveVideo.name).catch((error) => {
       console.error(`TMDB metadata failed for ${driveVideo.name}:`, error);
@@ -47,12 +63,13 @@ async function loadMovies(
     return {
       id: driveVideo.id,
       driveFileId: driveVideo.id,
+      isHevc: isHevcFile(driveVideo.name),
       title: metadata?.title ?? parsed.title,
       year:
         metadata?.year ??
         parsed.year ??
         new Date(driveVideo.modifiedTime).getFullYear(),
-      duration: "--:--",
+      duration: formatRuntime(metadata?.runtime),
       poster: buildImageUrl(
         metadata?.poster,
         TMDB_POSTER_BASE,
@@ -64,11 +81,15 @@ async function loadMovies(
         driveBackdrop
       ),
       description: metadata?.overview ?? "",
-      genres: metadata?.genres?.map(String) ?? [],
+      genres: metadata?.genres ?? [],
       rating: metadata?.rating,
       progress: 0,
     };
   });
+
+  return movies.sort(
+    (first, second) => Number(first.isHevc) - Number(second.isHevc)
+  );
 }
 
 export function getMovies(

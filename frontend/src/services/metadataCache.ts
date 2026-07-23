@@ -1,6 +1,8 @@
 const CACHE_KEY = "driveflix-metadata-cache";
 
 export interface CachedMetadata {
+  version?: number;
+  tmdbId?: number;
   title: string;
   year?: number;
 
@@ -10,8 +12,9 @@ export interface CachedMetadata {
   overview?: string;
 
   rating?: number;
-    genres?: number[];
+  genres?: string[];
   releaseDate?: string;
+  runtime?: number;
 
   cachedAt: number;
 }

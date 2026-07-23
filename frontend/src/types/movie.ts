@@ -20,4 +20,6 @@ export interface Movie {
   progress?: number;
 
   driveFileId?: string;
+
+  isHevc?: boolean;
 }

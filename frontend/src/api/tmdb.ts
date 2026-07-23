@@ -10,11 +10,29 @@ const api = axios.create({
   },
 });
 
+interface TmdbSearchMovie {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  vote_average: number;
+  release_date?: string;
+}
+
+export interface TmdbMovieDetails extends TmdbSearchMovie {
+  runtime: number | null;
+  genres: Array<{
+    id: number;
+    name: string;
+  }>;
+}
+
 export async function searchMovie(
   title: string,
   year?: number
 ) {
-  const response = await api.get("/search/movie", {
+  const response = await api.get<{ results: TmdbSearchMovie[] }>("/search/movie", {
     params: {
       query: title,
       year,
@@ -22,4 +40,14 @@ export async function searchMovie(
   });
 
   return response.data.results[0] ?? null;
+}
+
+export async function getMovieDetails(movieId: number) {
+  const response = await api.get<TmdbMovieDetails>(`/movie/${movieId}`, {
+    params: {
+      language: "en-US",
+    },
+  });
+
+  return response.data;
 }
