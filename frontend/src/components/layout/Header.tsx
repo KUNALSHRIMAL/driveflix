@@ -24,31 +24,49 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur">
-      <div className="mx-auto flex h-24 items-center gap-6 px-8 lg:px-12">
-        <NavLink to="/" data-tv-focus-key="header-home" className="shrink-0 text-4xl font-bold text-red-600">
-          DriveFlix
+    <header className="fixed inset-y-0 left-0 z-40 w-24 border-r border-zinc-800 bg-black/90 backdrop-blur lg:w-72">
+      <div className="flex h-full flex-col gap-8 px-3 py-8 lg:px-6">
+        <NavLink
+          to="/"
+          data-tv-focus-key="header-home"
+          className="shrink-0 text-center text-4xl font-bold text-red-600 lg:text-left"
+        >
+          <span className="lg:hidden">D</span>
+          <span className="hidden lg:inline">DriveFlix</span>
         </NavLink>
 
-        <nav className="hidden items-center gap-8 lg:flex">
+        <nav className="flex flex-col gap-3">
           {navigation.filter((item) => item.path !== "/search").map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               data-tv-focus-key={`header-${item.label.toLowerCase().replace(" ", "-")}`}
               className={({ isActive }) =>
-                `transition-colors ${
-                  isActive ? "text-white" : "text-zinc-400 hover:text-white"
+                `flex min-h-14 items-center rounded-xl px-3 text-lg transition-colors lg:px-5 ${
+                  isActive
+                    ? "bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                 }`
               }
             >
-              {item.label}
+              <span className="hidden lg:inline">{item.label}</span>
+              <span className="mx-auto text-xl font-bold lg:hidden">
+                {item.label.charAt(0)}
+              </span>
             </NavLink>
           ))}
         </nav>
 
-        <form onSubmit={submitSearch} className="ml-auto flex min-w-0 max-w-md flex-1">
-          <label className="flex h-14 w-full items-center gap-3 rounded-full border border-zinc-700 bg-zinc-900/90 px-5 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-600">
+        <form onSubmit={submitSearch} className="w-full">
+          <button
+            type="submit"
+            aria-label="Open search"
+            data-tv-focus-key="header-search-mobile"
+            className="flex h-14 w-full items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/90 lg:hidden"
+          >
+            <Search className="size-6 text-zinc-300" />
+          </button>
+          <label className="hidden h-14 w-full items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900/90 px-5 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-600 lg:flex">
             <Search className="size-5 shrink-0 text-zinc-400" />
             <input
               type="search"
@@ -62,14 +80,14 @@ const Header = () => {
           </label>
         </form>
 
-        <div className="relative">
+        <div className="relative mt-auto">
           <button
             type="button"
             onClick={() => setProfileOpen((open) => !open)}
             aria-label="Open profile menu"
             aria-expanded={profileOpen}
             data-tv-focus-key="header-profile"
-            className="flex min-h-14 items-center gap-3 rounded-full px-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-600"
+            className="flex min-h-16 w-full items-center justify-center gap-3 rounded-xl px-2 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-600 lg:justify-start"
           >
             {user?.picture ? (
               <img
@@ -82,13 +100,13 @@ const Header = () => {
                 <UserRound className="size-5" />
               </span>
             )}
-            <span className="hidden text-zinc-300 xl:block">
+            <span className="hidden truncate text-zinc-300 lg:block">
               {user?.name ?? "Guest"}
             </span>
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 top-14 w-48 rounded-xl border border-zinc-700 bg-zinc-900 p-2 shadow-2xl">
+            <div className="absolute bottom-20 left-0 w-56 rounded-xl border border-zinc-700 bg-zinc-900 p-2 shadow-2xl">
               {user ? (
                 <button
                   type="button"

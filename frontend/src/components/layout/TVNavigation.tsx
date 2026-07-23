@@ -68,20 +68,31 @@ const TVNavigation = () => {
       if (!active) return;
 
       if (active instanceof HTMLInputElement) {
-        if (active.type === "range") return;
+        if (active.type === "range") {
+          const isVolume = active.getAttribute("aria-label") === "Volume";
 
-        const selectionStart = active.selectionStart ?? 0;
-        const selectionEnd = active.selectionEnd ?? 0;
-        const atStart = selectionStart === 0 && selectionEnd === 0;
-        const atEnd =
-          selectionStart === active.value.length &&
-          selectionEnd === active.value.length;
+          if (
+            (isVolume &&
+              (event.key === "ArrowUp" || event.key === "ArrowDown")) ||
+            (!isVolume &&
+              (event.key === "ArrowLeft" || event.key === "ArrowRight"))
+          ) {
+            return;
+          }
+        } else {
+          const selectionStart = active.selectionStart ?? 0;
+          const selectionEnd = active.selectionEnd ?? 0;
+          const atStart = selectionStart === 0 && selectionEnd === 0;
+          const atEnd =
+            selectionStart === active.value.length &&
+            selectionEnd === active.value.length;
 
-        if (
-          (event.key === "ArrowLeft" && !atStart) ||
-          (event.key === "ArrowRight" && !atEnd)
-        ) {
-          return;
+          if (
+            (event.key === "ArrowLeft" && !atStart) ||
+            (event.key === "ArrowRight" && !atEnd)
+          ) {
+            return;
+          }
         }
       } else if (active.matches("textarea, select")) {
         return;

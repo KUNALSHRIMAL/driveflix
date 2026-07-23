@@ -374,6 +374,17 @@ const Player = () => {
             step={0.05}
             value={volume}
             onChange={(event) => changeVolume(Number(event.target.value))}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowUp") {
+                event.preventDefault();
+                event.stopPropagation();
+                changeVolume(Math.min(volume + 0.05, 1));
+              } else if (event.key === "ArrowDown") {
+                event.preventDefault();
+                event.stopPropagation();
+                changeVolume(Math.max(volume - 0.05, 0));
+              }
+            }}
             aria-label="Volume"
             data-tv-focus-key="player-volume"
             className="hidden h-3 w-32 cursor-pointer accent-red-600 sm:block"
