@@ -128,7 +128,19 @@
   html {
     @apply font-sans;
     }
+}
+
+@media (min-width: 768px) {
   :is(a, button, input, [tabindex]):focus-visible {
-    @apply outline-none ring-4 ring-red-600 ring-offset-4 ring-offset-black;
+    outline: 3px solid rgb(255 255 255 / 95%) !important;
+    outline-offset: 4px;
+    box-shadow:
+      0 0 0 7px rgb(139 92 246 / 28%),
+      0 0 30px rgb(139 92 246 / 55%) !important;
+    transform: scale(1.035);
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      outline-color 180ms ease;
   }
 }

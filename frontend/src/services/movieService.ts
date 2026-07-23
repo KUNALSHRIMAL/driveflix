@@ -3,6 +3,7 @@ import { TMDB_IMAGE_BASE, TMDB_POSTER_BASE } from "@/config/tmdb";
 import { getMovieMetadata } from "@/services/metadataService";
 import type { Movie } from "@/types/movie";
 import { parseMovieName } from "@/utils/parseMovieName";
+import { matchesMovieTitle } from "@/utils/movieSearch";
 import { promisePool } from "@/utils/promisePool";
 
 interface DriveVideo {
@@ -14,6 +15,7 @@ interface DriveVideo {
 
 let cachedAccessToken: string | undefined;
 const movieLibraryPromises = new Map<number, Promise<Movie[]>>();
+const driveVideoPromises = new Map<number, Promise<DriveVideo[]>>();
 
 function buildImageUrl(
   path: string | undefined,
@@ -42,12 +44,7 @@ function isHevcFile(fileName: string) {
   );
 }
 
-async function loadMovies(
-  accessToken: string,
-  limit: number
-): Promise<Movie[]> {
-  const driveVideos = (await getDriveVideos(accessToken, limit)) as DriveVideo[];
-
+async function enrichMovies(driveVideos: DriveVideo[]): Promise<Movie[]> {
   const movies = await promisePool(driveVideos, 10, async (driveVideo) => {
     const parsed = parseMovieName(driveVideo.name);
     const metadata = await getMovieMetadata(driveVideo.name).catch((error) => {
@@ -92,12 +89,32 @@ async function loadMovies(
   );
 }
 
+function loadDriveVideos(accessToken: string, limit: number) {
+  const existing = driveVideoPromises.get(limit);
+  if (existing) return existing;
+
+  const request = (
+    getDriveVideos(accessToken, limit) as Promise<DriveVideo[]>
+  ).catch((error) => {
+    driveVideoPromises.delete(limit);
+    throw error;
+  });
+  driveVideoPromises.set(limit, request);
+  return request;
+}
+
+async function loadMovies(accessToken: string, limit: number) {
+  const driveVideos = await loadDriveVideos(accessToken, limit);
+  return enrichMovies(driveVideos);
+}
+
 export function getMovies(
   accessToken: string,
   limit = 50
 ): Promise<Movie[]> {
   if (cachedAccessToken !== accessToken) {
     movieLibraryPromises.clear();
+    driveVideoPromises.clear();
     cachedAccessToken = accessToken;
   }
 
@@ -111,4 +128,24 @@ export function getMovies(
 
   movieLibraryPromises.set(limit, request);
   return request;
+}
+
+export async function searchMovies(accessToken: string, query: string) {
+  if (!query.trim()) return getMovies(accessToken);
+
+  if (cachedAccessToken !== accessToken) {
+    movieLibraryPromises.clear();
+    driveVideoPromises.clear();
+    cachedAccessToken = accessToken;
+  }
+
+  const driveVideos = await loadDriveVideos(
+    accessToken,
+    Number.POSITIVE_INFINITY
+  );
+  const matches = driveVideos.filter((driveVideo) =>
+    matchesMovieTitle(parseMovieName(driveVideo.name).title, query)
+  );
+
+  return enrichMovies(matches);
 }

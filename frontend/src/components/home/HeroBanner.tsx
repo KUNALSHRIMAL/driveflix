@@ -53,7 +53,7 @@ const HeroBanner = ({ movie, onPlay, onMoreInfo }: HeroBannerProps) => {
             onClick={() => onPlay?.(movie)}
             data-tv-focus-key="hero-play"
             data-tv-autofocus
-            className="focus-visible:ring-red-600"
+            className="focus-visible:ring-violet-400"
           >
             <Play className="size-5" />
             Play
@@ -64,7 +64,7 @@ const HeroBanner = ({ movie, onPlay, onMoreInfo }: HeroBannerProps) => {
             size="tv"
             onClick={() => onMoreInfo?.(movie)}
             data-tv-focus-key="hero-info"
-            className="border-white/40 bg-black/30 text-white backdrop-blur-sm hover:bg-white hover:text-black focus-visible:ring-red-600"
+            className="border-white/40 bg-black/30 text-white backdrop-blur-sm hover:bg-white hover:text-black focus-visible:ring-violet-400"
           >
             <Info className="size-5 " />
             More Info

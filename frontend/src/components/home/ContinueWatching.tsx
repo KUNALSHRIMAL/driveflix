@@ -1,4 +1,5 @@
-import { Play } from "lucide-react";
+import { useState } from "react";
+import { Play, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { Movie } from "@/types/movie";
@@ -47,7 +48,12 @@ const getSavedProgress = (movie: Movie): SavedProgress | null => {
 };
 
 const ContinueWatching = ({ movies, onContinue }: ContinueWatchingProps) => {
+  const [clearedMovieIds, setClearedMovieIds] = useState<Set<string>>(
+    () => new Set()
+  );
   const entries = movies.flatMap((movie) => {
+    if (clearedMovieIds.has(movie.id)) return [];
+
     const progress = getSavedProgress(movie);
 
     if (!progress || progress.currentTime <= 0) return [];
@@ -60,6 +66,12 @@ const ContinueWatching = ({ movies, onContinue }: ContinueWatchingProps) => {
 
     return [{ movie, progress, percentage }];
   });
+
+  const clearProgress = (movie: Movie) => {
+    const fileId = movie.driveFileId ?? movie.id;
+    localStorage.removeItem(`driveflix-progress-${fileId}`);
+    setClearedMovieIds((current) => new Set(current).add(movie.id));
+  };
 
   if (!entries.length) return null;
 
@@ -103,15 +115,28 @@ const ContinueWatching = ({ movies, onContinue }: ContinueWatchingProps) => {
                 />
               </div>
 
-              <Button
-                size="tv"
-                className="mt-5"
-                onClick={() => onContinue(movie)}
-                data-tv-focus-key={`continue-${movie.id}`}
-              >
-                <Play className="size-5" />
-                Continue
-              </Button>
+              <div className="mt-5 flex gap-3">
+                <Button
+                  size="tv"
+                  className="flex-1 px-4"
+                  onClick={() => onContinue(movie)}
+                  data-tv-focus-key={`continue-${movie.id}`}
+                >
+                  <Play className="size-5" />
+                  Continue
+                </Button>
+                <Button
+                  size="tv"
+                  variant="outline"
+                  className="border-white/40 bg-black/30 text-white backdrop-blur-sm hover:bg-white hover:text-black focus-visible:ring-red-600"
+                  onClick={() => clearProgress(movie)}
+                  data-tv-focus-key={`clear-progress-${movie.id}`}
+                  aria-label={`Clear ${movie.title} from Continue Watching`}
+                >
+                  <Trash2 className="size-5" />
+                  Clear
+                </Button>
+              </div>
             </div>
           </article>
         ))}

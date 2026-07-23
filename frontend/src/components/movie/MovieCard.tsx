@@ -27,10 +27,6 @@ const MovieCard = ({ movie, onClick }: MovieCardProps) => {
         hover:scale-105
         hover:shadow-2xl
         focus-visible:outline-none
-        focus-visible:ring-4
-        focus-visible:ring-red-600
-        focus-visible:ring-offset-2
-        focus-visible:ring-offset-zinc-black
         focus-visible:scale-105
         group-hover:brightness-110
         

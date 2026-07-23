@@ -66,7 +66,7 @@ const Header = () => {
           >
             <Search className="size-6 text-zinc-300" />
           </button>
-          <label className="hidden h-14 w-full items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900/90 px-5 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-600 lg:flex">
+          <label className="hidden h-14 w-full items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900/90 px-5 transition focus-within:border-violet-300 focus-within:ring-4 focus-within:ring-violet-500/30 lg:flex">
             <Search className="size-5 shrink-0 text-zinc-400" />
             <input
               type="search"
@@ -87,7 +87,7 @@ const Header = () => {
             aria-label="Open profile menu"
             aria-expanded={profileOpen}
             data-tv-focus-key="header-profile"
-            className="flex min-h-16 w-full items-center justify-center gap-3 rounded-xl px-2 hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-600 lg:justify-start"
+            className="flex min-h-16 w-full items-center justify-center gap-3 rounded-xl px-2 hover:bg-zinc-900 focus-visible:outline-none lg:justify-start"
           >
             {user?.picture ? (
               <img

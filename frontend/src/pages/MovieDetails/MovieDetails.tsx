@@ -79,7 +79,7 @@ const MovieDetails = () => {
 
             <Button
               size="tv"
-              className="mt-8 focus-visible:ring-red-600"
+              className="mt-8 focus-visible:ring-violet-400"
               data-tv-focus-key="details-play"
               data-tv-autofocus
               onClick={() =>
