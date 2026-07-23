@@ -69,16 +69,16 @@ const Home = () => {
         movies={trendingMovies}
         onMovieClick={handleMovieClick}
       /> */}
+        <ContinueWatching
+          movies={driveMovies}
+          onContinue={(movie) =>
+            navigate(`/player/${movie.id}`, { state: { movie } })
+          }
+        />
       <MovieRow
         title="My Google Drive"
         movies={driveMovies}
         onMovieClick={handleMovieClick}
-      />
-      <ContinueWatching
-        movies={driveMovies}
-        onContinue={(movie) =>
-          navigate(`/player/${movie.id}`, { state: { movie } })
-        }
       />
 
       {/* <MovieRow
