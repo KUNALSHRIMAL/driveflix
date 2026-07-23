@@ -12,6 +12,9 @@ interface DriveVideo {
   modifiedTime: string;
 }
 
+let cachedAccessToken: string | undefined;
+const movieLibraryPromises = new Map<number, Promise<Movie[]>>();
+
 function buildImageUrl(
   path: string | undefined,
   baseUrl: string,
@@ -23,25 +26,24 @@ function buildImageUrl(
   return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export async function getMovies(accessToken: string): Promise<Movie[]> {
-  const driveVideos = (await getDriveVideos(accessToken)) as DriveVideo[];
-  console.log("movieService driveVideos count", driveVideos.length);
+async function loadMovies(
+  accessToken: string,
+  limit: number
+): Promise<Movie[]> {
+  const driveVideos = (await getDriveVideos(accessToken, limit)) as DriveVideo[];
 
-  const movies = await promisePool(driveVideos, 5, async (driveVideo) => {
+  return promisePool(driveVideos, 10, async (driveVideo) => {
     const parsed = parseMovieName(driveVideo.name);
-    console.log("worker start", driveVideo.name);
     const metadata = await getMovieMetadata(driveVideo.name).catch((error) => {
       console.error(`TMDB metadata failed for ${driveVideo.name}:`, error);
       return null;
     });
-    console.log("metadata received", driveVideo.name, metadata);
     const driveThumbnail =
       driveVideo.thumbnailLink ??
       `https://drive.google.com/thumbnail?id=${driveVideo.id}&sz=w400`;
     const driveBackdrop =
       `https://drive.google.com/thumbnail?id=${driveVideo.id}&sz=w1000`;
 
-    console.log("worker return", driveVideo.name);
     return {
       id: driveVideo.id,
       driveFileId: driveVideo.id,
@@ -67,8 +69,25 @@ export async function getMovies(accessToken: string): Promise<Movie[]> {
       progress: 0,
     };
   });
+}
 
-  console.log("movieService movies count", movies.length);
-  console.log("getMovies returning", movies.length);
-  return movies;
+export function getMovies(
+  accessToken: string,
+  limit = 50
+): Promise<Movie[]> {
+  if (cachedAccessToken !== accessToken) {
+    movieLibraryPromises.clear();
+    cachedAccessToken = accessToken;
+  }
+
+  const existing = movieLibraryPromises.get(limit);
+  if (existing) return existing;
+
+  const request = loadMovies(accessToken, limit).catch((error) => {
+    movieLibraryPromises.delete(limit);
+    throw error;
+  });
+
+  movieLibraryPromises.set(limit, request);
+  return request;
 }

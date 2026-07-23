@@ -1,5 +1,6 @@
 import {
   createContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,7 +25,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("driveflix-user");
 
-    return storedUser ? JSON.parse(storedUser) : null;
+    if (!storedUser) return null;
+
+    try {
+      const stored = JSON.parse(storedUser) as User;
+      return stored.expiresAt > Date.now() ? stored : null;
+    } catch {
+      return null;
+    }
   });
 
   const login = (user: User) => {
@@ -36,6 +44,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
     localStorage.removeItem("driveflix-user");
   };
+
+  useEffect(() => {
+    if (!user) {
+      localStorage.removeItem("driveflix-user");
+
+      if (window.location.pathname !== "/login") {
+        window.location.replace("/login");
+      }
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setUser(null);
+      localStorage.removeItem("driveflix-user");
+      window.location.replace("/login");
+    }, Math.max(user.expiresAt - Date.now(), 0));
+
+    return () => window.clearTimeout(timeout);
+  }, [user]);
 
   const value = useMemo(
     () => ({

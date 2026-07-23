@@ -17,18 +17,22 @@ export async function getMovieMetadata(fileName: string) {
   const cached = cache[key];
 
   const isValidCache =
-    cached && cached.poster && cached.backdrop && cached.overview;
+    cached && Date.now() - cached.cachedAt < 7 * 24 * 60 * 60 * 1000;
 
   if (isValidCache) {
-    console.log("✅ Cache Hit:", parsed.title);
     return cached;
   }
 
-  console.log("🌐 TMDB:", parsed.title);
-
   const movie = await searchMovie(parsed.title, parsed.year);
-  console.log("TMDB Response:", movie);
-  if (!movie) return null;
+  if (!movie) {
+    cache[key] = {
+      title: parsed.title,
+      year: parsed.year,
+      cachedAt: Date.now(),
+    };
+    saveMetadataCache(cache);
+    return null;
+  }
 
   cache[key] = {
     title: movie.title,

@@ -1,41 +1,120 @@
 import { Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-const ContinueWatching = () => {
+import { Button } from "@/components/ui/button";
+import type { Movie } from "@/types/movie";
+
+interface ContinueWatchingProps {
+  movies: Movie[];
+  onContinue: (movie: Movie) => void;
+}
+
+interface SavedProgress {
+  currentTime: number;
+  duration: number;
+}
+
+const formatTime = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${String(
+        remainingSeconds
+      ).padStart(2, "0")}`
+    : `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+};
+
+const getSavedProgress = (movie: Movie): SavedProgress | null => {
+  const fileId = movie.driveFileId ?? movie.id;
+  const saved = localStorage.getItem(`driveflix-progress-${fileId}`);
+  if (!saved) return null;
+
+  try {
+    const parsed = JSON.parse(saved) as SavedProgress | number;
+
+    if (typeof parsed === "number") {
+      return { currentTime: parsed, duration: 0 };
+    }
+
+    return parsed;
+  } catch {
+    const legacyTime = Number(saved);
+    return Number.isFinite(legacyTime)
+      ? { currentTime: legacyTime, duration: 0 }
+      : null;
+  }
+};
+
+const ContinueWatching = ({ movies, onContinue }: ContinueWatchingProps) => {
+  const entries = movies.flatMap((movie) => {
+    const progress = getSavedProgress(movie);
+
+    if (!progress || progress.currentTime <= 0) return [];
+
+    const percentage = progress.duration
+      ? Math.min((progress.currentTime / progress.duration) * 100, 100)
+      : 0;
+
+    if (percentage >= 95) return [];
+
+    return [{ movie, progress, percentage }];
+  });
+
+  if (!entries.length) return null;
+
   return (
     <section className="space-y-6">
-      <h2 className="text-3xl font-bold text-white">
-        Continue Watching
-      </h2>
+      <h2 className="text-3xl font-bold text-white">Continue Watching</h2>
 
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8 shadow-lg">
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-white">
-            Interstellar
-          </h3>
+      <div className="flex snap-x gap-6 overflow-x-auto pb-4">
+        {entries.map(({ movie, progress, percentage }) => (
+          <article
+            key={movie.id}
+            className="w-[360px] shrink-0 snap-start overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-lg"
+          >
+            <div className="relative aspect-video bg-zinc-800">
+              {movie.backdrop && (
+                <img
+                  src={movie.backdrop}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <h3 className="absolute bottom-4 left-5 right-5 truncate text-xl font-bold text-white">
+                {movie.title}
+              </h3>
+            </div>
 
-          <p className="text-sm text-zinc-400">
-            Sci-Fi • 2014 • 2h 49m
-          </p>
-        </div>
+            <div className="p-5">
+              <div className="mb-2 flex justify-between text-sm text-zinc-400">
+                <span>{percentage ? `${Math.round(percentage)}% watched` : "In progress"}</span>
+                <span>
+                  {formatTime(progress.currentTime)}
+                  {progress.duration ? ` / ${formatTime(progress.duration)}` : ""}
+                </span>
+              </div>
 
-        <div className="mt-8">
-          <div className="mb-2 flex items-center justify-between text-sm text-zinc-400">
-            <span>42% Watched</span>
-            <span>01:18:25 / 02:49:00</span>
-          </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-zinc-700">
+                <div
+                  className="h-full rounded-full bg-red-600"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-zinc-700">
-            <div className="h-full w-[42%] rounded-full bg-red-600 transition-all duration-500" />
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <Button size="tv">
-            <Play className="size-5" />
-            Continue Watching
-          </Button>
-        </div>
+              <Button
+                size="tv"
+                className="mt-5"
+                onClick={() => onContinue(movie)}
+                data-tv-focus-key={`continue-${movie.id}`}
+              >
+                <Play className="size-5" />
+                Continue
+              </Button>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );

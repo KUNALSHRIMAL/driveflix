@@ -4,13 +4,10 @@ import { useNavigate } from "react-router-dom";
 import ContinueWatching from "@/components/home/ContinueWatching";
 import HeroBanner from "@/components/home/HeroBanner";
 import MovieRow from "@/components/home/MovieRow";
+import LoadingIndicator from "@/components/ui/LoadingIndicator";
 
 import { getMovies } from "@/services/movieService";
 import { useAuth } from "@/hooks/useAuth";
-
-import {
-  trendingMovies,
-} from "@/constants/movies";
 
 import type { Movie } from "@/types/movie";
 
@@ -19,6 +16,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const [driveMovies, setDriveMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(() => Boolean(user));
   useEffect(() => {
     async function loadMovies() {
       if (!user) return;
@@ -28,18 +26,16 @@ const Home = () => {
         // console.log("Access Token:", user?.accessToken);
         const movies = await getMovies(user.accessToken);
 
-        console.log("movies before setState", movies.length);
         setDriveMovies(movies);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
 
     loadMovies();
   }, [user]);
-  useEffect(() => {
-    console.log("driveMovies state", driveMovies.length);
-  }, [driveMovies]);
   const handleMovieClick = (movie: Movie) => {
     navigate(`/movie/${movie.id}`, { state: { movie } });
   };
@@ -47,11 +43,17 @@ const Home = () => {
     driveMovies.find((movie) =>
       movie.backdrop?.startsWith("https://image.tmdb.org/")
     ) ?? driveMovies[0];
-console.log("Drive Movies:", driveMovies.length);
-console.log(driveMovies);
-  console.log("Passing to MovieRow", driveMovies.length);
+
+  if (loading) {
+    return (
+      <main className="px-8 py-10 lg:px-16 xl:px-20">
+        <LoadingIndicator label="Loading your movie library…" />
+      </main>
+    );
+  }
+
   return (
-    <div className="space-y-16 px-10 py-10">
+    <div className="space-y-16 px-8 py-10 lg:px-16 xl:px-20">
       {featuredDriveMovie && (
         <HeroBanner
           movie={featuredDriveMovie}
@@ -62,17 +64,22 @@ console.log(driveMovies);
         />
       )}
 
-      <MovieRow
+      {/* <MovieRow
         title="Trending Movies"
         movies={trendingMovies}
         onMovieClick={handleMovieClick}
-      />
+      /> */}
       <MovieRow
         title="My Google Drive"
         movies={driveMovies}
         onMovieClick={handleMovieClick}
       />
-      <ContinueWatching />
+      <ContinueWatching
+        movies={driveMovies}
+        onContinue={(movie) =>
+          navigate(`/player/${movie.id}`, { state: { movie } })
+        }
+      />
 
       {/* <MovieRow
         title="Recently Added"

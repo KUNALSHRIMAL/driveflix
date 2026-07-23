@@ -43,7 +43,8 @@ const MovieDetails = () => {
           type="button"
           onClick={() => navigate(-1)}
           aria-label="Go back"
-          className="absolute left-6 top-6 rounded-full bg-black/50 p-3 text-white backdrop-blur-sm transition hover:bg-black/80 sm:left-10"
+          data-tv-focus-key="details-back"
+          className="absolute left-10 top-10 rounded-full bg-black/50 p-4 text-white backdrop-blur-sm transition hover:bg-black/80"
         >
           <ArrowLeft className="size-6" />
         </button>
@@ -79,6 +80,8 @@ const MovieDetails = () => {
             <Button
               size="tv"
               className="mt-8 focus-visible:ring-red-600"
+              data-tv-focus-key="details-play"
+              data-tv-autofocus
               onClick={() =>
                 navigate(`/player/${movie.id}`, { state: { movie } })
               }

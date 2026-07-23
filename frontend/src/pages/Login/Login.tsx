@@ -21,6 +21,8 @@ const Login = () => {
           email: googleUser.email,
           picture: googleUser.picture,
           accessToken: tokenResponse.access_token,
+          expiresAt:
+            Date.now() + (tokenResponse.expires_in ?? 3600) * 1000 - 60_000,
         });
 
         navigate("/");
@@ -46,8 +48,11 @@ const Login = () => {
         </p>
 
         <button
+          type="button"
           onClick={() => googleLogin()}
-          className="w-full rounded-xl bg-red-600 px-6 py-4 text-lg font-semibold text-white transition hover:bg-red-700"
+          data-tv-focus-key="login-google"
+          data-tv-autofocus
+          className="min-h-16 w-full rounded-xl bg-red-600 px-8 py-4 text-xl font-semibold text-white transition hover:bg-red-700"
         >
           Continue with Google
         </button>

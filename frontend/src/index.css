@@ -128,4 +128,7 @@
   html {
     @apply font-sans;
     }
+  :is(a, button, input, [tabindex]):focus-visible {
+    @apply outline-none ring-4 ring-red-600 ring-offset-4 ring-offset-black;
+  }
 }

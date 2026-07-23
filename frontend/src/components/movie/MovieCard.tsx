@@ -6,23 +6,18 @@ interface MovieCardProps {
 }
 
 const MovieCard = ({ movie, onClick }: MovieCardProps) => {
-  console.log("Rendering card", movie.title);
-  console.log({
-  title: movie.title,
-  poster: movie.poster,
-});
-  // console.log(movie.poster);
   return (
     <button
       type="button"
+      data-tv-focusable
+      data-tv-focus-key={`movie-${movie.id}`}
       aria-label={`Open ${movie.title}`}
       onClick={() => onClick?.(movie)}
       
       className="
-      snap-start
-        shrink-0
         group
-        w-[220px]
+        w-full
+        min-w-0
         overflow-hidden
         rounded-2xl
         bg-zinc-900
@@ -46,8 +41,6 @@ const MovieCard = ({ movie, onClick }: MovieCardProps) => {
           <img
             src={movie.poster}
             alt={movie.title}
-  //            onLoad={() => console.log("Loaded", movie.title)}
-  // onError={() => console.log("Failed", movie.title)}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (

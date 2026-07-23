@@ -12,20 +12,20 @@ const MovieRow = ({
   movies,
   onMovieClick,
 }: MovieRowProps) => {
-  console.log("MovieRow", title, movies.length);
   return (
     <section className="space-y-5">
       <h2 className="text-2xl font-bold text-white">
         {title}
       </h2>
 
-      <div className="flex
-          gap-8
-          overflow-x-auto
-          pb-4
-          scroll-smooth
-          snap-x
-          snap-mandatory">
+      <div className="
+          grid
+          grid-cols-2
+          gap-6
+          sm:grid-cols-3
+          lg:grid-cols-4
+          xl:grid-cols-5
+          2xl:grid-cols-6">
         {movies.map((movie) => (
           <MovieCard
             key={movie.id}
